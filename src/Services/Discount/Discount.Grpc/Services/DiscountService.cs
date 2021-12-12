@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
+using Discount.Grpc.Entities;
 using Discount.Grpc.Protos;
 using Discount.Grpc.Repositories;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace Discount.Grpc.Services
 {
@@ -26,16 +30,17 @@ namespace Discount.Grpc.Services
                 throw new RpcException(new Status(StatusCode.NotFound, $"Discount with ProductName={request.ProductName} is not found."));
             }
             _logger.LogInformation("Discount is retrieved for ProductName : {productName}, Amount : {amount}", coupon.ProductName, coupon.Amount);
-            var couponeModel = _mapper.Map<CouponModel>(coupon);
-            return couponeModel;
+
+            var couponModel = _mapper.Map<CouponModel>(coupon);
+            return couponModel;
         }
 
         public override async Task<CouponModel> CreateDiscount(CreateDiscountRequest request, ServerCallContext context)
         {
-            var coupon = _mapper.Map<CouponModel>(request.Coupon);
+            var coupon = _mapper.Map<Coupon>(request.Coupon);
 
             await _repository.CreateDiscount(coupon);
-            _logger.LogInformation("Discount is successfully created. ProductName : {productName}", coupon.ProductName);
+            _logger.LogInformation("Discount is successfully created. ProductName : {ProductName}", coupon.ProductName);
 
             var couponModel = _mapper.Map<CouponModel>(coupon);
             return couponModel;
@@ -43,9 +48,10 @@ namespace Discount.Grpc.Services
 
         public override async Task<CouponModel> UpdateDiscount(UpdateDiscountRequest request, ServerCallContext context)
         {
-            var coupon = _mapper.Map<CouponModel>(request.Coupon);
+            var coupon = _mapper.Map<Coupon>(request.Coupon);
+
             await _repository.UpdateDiscount(coupon);
-            _logger.LogInformation("Discount is succesfully update. ProductName : {ProductName}", coupon.ProductName);
+            _logger.LogInformation("Discount is successfully updated. ProductName : {ProductName}", coupon.ProductName);
 
             var couponModel = _mapper.Map<CouponModel>(coupon);
             return couponModel;
